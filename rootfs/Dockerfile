@@ -2,8 +2,8 @@ FROM alpine:3.17.3
 
 ARG HAPROXY_MODSEC_REF=3c895f3e7dd291dba19d57ba054b277e6fb80ca4
 ARG HAPROXY_MODSEC_SHA256=645ff6fd6fe1394462bd6b82ee5430606c631b83021f8b5cd7eca2b62b427970
-ARG MODSEC_VERSION=2.9.6
-ARG MODSEC_SHA256=626a831aca92cdff73ea68a85b7f5c105d9a15365fa270fbed3139a81eaf3344
+ARG MODSEC_VERSION=3.0.10
+ARG MODSEC_SHA256=d5d459f7c2e57a69a405f3222d8e285de419a594b0ea8829058709962227ead0
 
 ADD spoa-log.patch /
 
@@ -15,6 +15,7 @@ RUN apk upgrade --no-cache \
         tar \
         make \
         gcc \
+	g++ \
         libc-dev \
         linux-headers \
         apache2-dev \
@@ -23,7 +24,7 @@ RUN apk upgrade --no-cache \
         libevent-dev \
         curl-dev \
         yajl-dev \
-    && curl -fsSLo /tmp/modsecurity.tar.gz https://github.com/SpiderLabs/ModSecurity/releases/download/v${MODSEC_VERSION}/modsecurity-${MODSEC_VERSION}.tar.gz \
+    && curl -fsSLo /tmp/modsecurity.tar.gz https://github.com/SpiderLabs/ModSecurity/releases/download/v${MODSEC_VERSION}/modsecurity-v${MODSEC_VERSION}.tar.gz \
     && curl -fsSLo /tmp/haproxy-modsecurity.zip https://github.com/haproxy/spoa-modsecurity/archive/${HAPROXY_MODSEC_REF}.zip \
     && echo "$MODSEC_SHA256  /tmp/modsecurity.tar.gz" | sha256sum -c \
     && mkdir -p /usr/src/modsecurity \
@@ -37,11 +38,11 @@ RUN apk upgrade --no-cache \
     && cd /usr/src/modsecurity \
     && ./configure \
         --prefix=/usr/src/modsecurity/INSTALL \
-        --disable-apache2-module \
-        --enable-standalone-module \
-        --enable-pcre-study \
+        #--disable-apache2-module \
+        #--enable-standalone-module \
+        #--enable-pcre-study \
         --without-lua \
-        --enable-pcre-jit \
+        #--enable-pcre-jit \
     && make -C standalone install \
     && mkdir -p INSTALL/include \
     && cp standalone/*.h apache2/*.h INSTALL/include \
